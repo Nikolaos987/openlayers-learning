@@ -1,5 +1,5 @@
 import { LineString, Point, Polygon } from "ol/geom";
-import { Projection } from "ol/proj";
+import { Projection, toLonLat } from "ol/proj";
 
 export const point = new Point([0, 0]);
 export const line = new LineString([
@@ -22,3 +22,9 @@ export const projection = new Projection({
   units: "pixels",
   extent: extent,
 });
+
+// Example EPSG:3857 coordinates (in meters)
+export const coordsEPSG3857 = [11557167.27, 150529.06];
+
+// Convert EPSG:3857 to EPSG:4326
+export const coordsEPSG4326 = toLonLat(coordsEPSG3857);

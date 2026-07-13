@@ -3,9 +3,9 @@ import "ol/ol.css";
 import { Map, Overlay, View } from "ol";
 
 import "./MapView.css";
-import { defaults as defaultInteractions, DragBox } from "ol/interaction";
+import { defaults as defaultInteractions, DragBox, DragRotate } from "ol/interaction";
 import { tileLayer } from "./layers";
-import { shiftKeyOnly } from "ol/events/condition";
+import { altKeyOnly, shiftKeyOnly } from "ol/events/condition";
 
 export default function MapView() {
   const mapRef = useRef<HTMLDivElement | null>(null);
@@ -13,10 +13,12 @@ export default function MapView() {
   const popupRef = useRef<HTMLDivElement | null>(null);
   const overlayInstance = useRef<Overlay | null>(null);
 
-  // const [toggle, setToggle] = useState<string>("Reveal Map");
-
   const dragBoxInteraction = new DragBox({
     condition: shiftKeyOnly,
+  });
+
+  const dragRotateInteraction = new DragRotate({
+    condition: altKeyOnly,
   });
 
   useEffect(() => {
@@ -47,6 +49,7 @@ export default function MapView() {
       // ],
     });
 
+    mapInstance.current.addInteraction(dragRotateInteraction);
     mapInstance.current.addInteraction(dragBoxInteraction);
 
     dragBoxInteraction.on("boxend", () => {

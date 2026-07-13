@@ -1,10 +1,11 @@
-import { useEffect, useRef, useState, type UIEvent } from "react";
+import { useEffect, useRef, useState } from "react";
 import "ol/ol.css";
-import { Map, MapBrowserEvent, Overlay, View } from "ol";
+import { Map, Overlay, View } from "ol";
 
 import "./MapView.css";
-import { defaults as defaultInteractions } from "ol/interaction";
+import { defaults as defaultInteractions, DragBox } from "ol/interaction";
 import { tileLayer } from "./layers";
+import { shiftKeyOnly } from "ol/events/condition";
 
 export default function MapView() {
   const mapRef = useRef<HTMLDivElement | null>(null);
@@ -13,7 +14,10 @@ export default function MapView() {
   const overlayInstance = useRef<Overlay | null>(null);
 
   // const [toggle, setToggle] = useState<string>("Reveal Map");
-  const [coords, setCoords] = useState<number[] | null>(null);
+
+  const dragBoxInteraction = new DragBox({
+    condition: shiftKeyOnly,
+  });
 
   useEffect(() => {
     if (!mapRef.current || mapInstance.current) return;
@@ -30,9 +34,9 @@ export default function MapView() {
       layers: [tileLayer],
       view: new View({
         center: [11557167.27, 150529.06],
-        zoom: 10,
-        maxZoom: 12,
-        minZoom: 8,
+        zoom: 8,
+        maxZoom: 17,
+        minZoom: 5,
       }),
       overlays: [overlayInstance.current],
       // controls: [
@@ -43,11 +47,13 @@ export default function MapView() {
       // ],
     });
 
-    mapInstance.current.on("click", (event) => {
-      const coordinates = event.coordinate;
-      overlayInstance.current?.setPosition(coordinates);
-      setCoords(coordinates);
+    mapInstance.current.addInteraction(dragBoxInteraction);
+
+    dragBoxInteraction.on("boxend", () => {
+      const extent = dragBoxInteraction.getGeometry().getExtent();
+      mapInstance.current?.getView().fit(extent, { duration: 500 });
     });
+
     // Cleanup on unmount
     return () => {
       mapInstance.current?.setTarget(undefined);
@@ -55,12 +61,5 @@ export default function MapView() {
     };
   }, []);
 
-  return (
-    <div>
-      <div ref={mapRef} className="map-container" />
-      <div ref={popupRef} className="ol-popup">
-        {coords && `You clicked at ${coords[0].toFixed(2)}, ${coords[1].toFixed(2)}`}
-      </div>
-    </div>
-  );
+  return <div ref={mapRef} className="map-container" />;
 }

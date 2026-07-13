@@ -1,33 +1,16 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import "ol/ol.css";
-import { Feature, Map, View } from "ol";
-import TileLayer from "ol/layer/Tile";
-import OSM from "ol/source/OSM";
+import { Map, View } from "ol";
 
 import "./MapView.css";
-import VectorLayer from "ol/layer/Vector";
-import VectorSource from "ol/source/Vector";
-import { FullScreen, Rotate, ScaleLine, Zoom, ZoomSlider } from "ol/control";
-import { LineString, Point, Polygon } from "ol/geom";
 import { defaults as defaultInteractions } from "ol/interaction";
+import { tileLayer } from "./layers";
 
 export default function MapView() {
   const mapRef = useRef<HTMLDivElement | null>(null);
   const mapInstance = useRef<Map | null>(null);
 
-  const point = new Point([0, 0]);
-  const line = new LineString([
-    [0, 0],
-    [1, 1],
-  ]);
-  const polygon = new Polygon([
-    [
-      [0, 0],
-      [1, 1],
-      [1, 0],
-      [0, 0],
-    ],
-  ]);
+  const [toggle, setToggle] = useState<string>("Reveal Map");
 
   useEffect(() => {
     if (!mapRef.current || mapInstance.current) return;
@@ -35,27 +18,19 @@ export default function MapView() {
     mapInstance.current = new Map({
       target: mapRef.current,
       interactions: defaultInteractions(),
-      layers: [
-        new VectorLayer({
-          source: new VectorSource({
-            features: [new Feature({ geometry: polygon })],
-          }),
-        }),
-        new TileLayer({ source: new OSM() }),
-      ],
+      layers: [],
       view: new View({
         center: [11557167.27, 150529.06],
         zoom: 10,
         maxZoom: 12,
         minZoom: 8,
-        extent: [-572513.341856, 5211017.966314, 916327.095083, 6636950.728974],
       }),
-      controls: [
-        new ScaleLine(),
-        new ZoomSlider(),
-        new Rotate({ label: "hello" }),
-        new FullScreen({ tipLabel: "Toggle fullscreen" }),
-      ],
+      // controls: [
+      //   new ScaleLine(),
+      //   new ZoomSlider(),
+      //   new Rotate({ label: "hello" }),
+      //   new FullScreen({ tipLabel: "Toggle fullscreen" }),
+      // ],
     });
     // Cleanup on unmount
     return () => {
@@ -64,5 +39,24 @@ export default function MapView() {
     };
   }, []);
 
-  return <div ref={mapRef} className="map-container" />;
+  return (
+    <>
+      <div ref={mapRef} className="map-container" />
+      <button
+        type="button"
+        onClick={() => {
+          if (toggle === "Reveal Map") {
+            mapInstance.current?.addLayer(tileLayer);
+            setToggle("Hide Map");
+          } else {
+            mapInstance.current?.removeLayer(tileLayer);
+            // tileLayer.setVisible(false);
+            setToggle("Reveal Map");
+          }
+        }}
+      >
+        {toggle}
+      </button>
+    </>
+  );
 }

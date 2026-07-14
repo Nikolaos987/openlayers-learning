@@ -4,7 +4,7 @@ import { Map, Overlay, View } from "ol";
 
 import "./MapView.css";
 import { defaults as defaultInteractions } from "ol/interaction";
-import { tileLayer } from "./layers";
+import { tileLayer, untiledLayer, vectorLayer } from "./layers";
 import VectorSource from "ol/source/Vector";
 import VectorLayer from "ol/layer/Vector";
 import OverviewMap from "ol/control/OverviewMap";
@@ -37,9 +37,10 @@ export default function MapView() {
     mapInstance.current = new Map({
       target: mapRef.current,
       interactions: defaultInteractions(),
-      layers: [tileLayer, vectorLayer2],
+      layers: [untiledLayer, vectorLayer],
       view: new View({
-        center: [11557167.27, 150529.06],
+        projection: "EPSG:4326",
+        center: [0,0],
         zoom: 8,
         maxZoom: 17,
       }),

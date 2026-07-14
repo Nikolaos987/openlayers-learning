@@ -28,3 +28,25 @@ export const coordsEPSG3857 = [11557167.27, 150529.06];
 
 // Convert EPSG:3857 to EPSG:4326
 export const coordsEPSG4326 = toLonLat(coordsEPSG3857);
+
+export const landGeoJSON = {
+  type: "FeatureCollection",
+  features: [
+    {
+      type: "Feature",
+      properties: { name: "Sample Landmass" },
+      geometry: {
+        type: "Polygon",
+        coordinates: [
+          [
+            [10, 40],
+            [20, 45],
+            [25, 38],
+            [15, 35],
+            [10, 40],
+          ],
+        ],
+      },
+    },
+  ],
+};

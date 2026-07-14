@@ -1,24 +1,28 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import "ol/ol.css";
 import { Map, Overlay, View } from "ol";
 
 import "./MapView.css";
-import { defaults as defaultInteractions, DragBox, DragRotate } from "ol/interaction";
-import { tileLayer } from "./layers";
-import { altKeyOnly, shiftKeyOnly } from "ol/events/condition";
+import { defaults as defaultInteractions, Draw } from "ol/interaction";
+import { tileLayer, vectorLayer } from "./layers";
+import VectorSource from "ol/source/Vector";
+import VectorLayer from "ol/layer/Vector";
 
 export default function MapView() {
   const mapRef = useRef<HTMLDivElement | null>(null);
   const mapInstance = useRef<Map | null>(null);
   const popupRef = useRef<HTMLDivElement | null>(null);
   const overlayInstance = useRef<Overlay | null>(null);
+  const source = new VectorSource();
 
-  const dragBoxInteraction = new DragBox({
-    condition: shiftKeyOnly,
+  // Add vector layer for rendering
+  const vectorLayer2 = new VectorLayer({
+    source: source,
   });
 
-  const dragRotateInteraction = new DragRotate({
-    condition: altKeyOnly,
+  const draw = new Draw({
+    source: source,
+    type: "Polygon",
   });
 
   useEffect(() => {
@@ -33,7 +37,7 @@ export default function MapView() {
     mapInstance.current = new Map({
       target: mapRef.current,
       interactions: defaultInteractions(),
-      layers: [tileLayer],
+      layers: [tileLayer, vectorLayer2],
       view: new View({
         center: [11557167.27, 150529.06],
         zoom: 8,
@@ -49,13 +53,7 @@ export default function MapView() {
       // ],
     });
 
-    mapInstance.current.addInteraction(dragRotateInteraction);
-    mapInstance.current.addInteraction(dragBoxInteraction);
-
-    dragBoxInteraction.on("boxend", () => {
-      const extent = dragBoxInteraction.getGeometry().getExtent();
-      mapInstance.current?.getView().fit(extent, { duration: 500 });
-    });
+    mapInstance.current.addInteraction(draw);
 
     // Cleanup on unmount
     return () => {

@@ -3,11 +3,15 @@ import "ol/ol.css";
 import { Map, Overlay, View } from "ol";
 
 import "./MapView.css";
-import { defaults as defaultInteractions, Draw } from "ol/interaction";
+import { defaults as defaultInteractions } from "ol/interaction";
 import { tileLayer } from "./layers";
 import VectorSource from "ol/source/Vector";
 import VectorLayer from "ol/layer/Vector";
-import GeoJSON from "ol/format/GeoJSON";
+import OverviewMap from "ol/control/OverviewMap";
+import MousePosition from "ol/control/MousePosition";
+import Attribution from "ol/control/Attribution";
+import { createStringXY } from "ol/coordinate";
+import { myControl } from "./customControls";
 
 export default function MapView() {
   const mapRef = useRef<HTMLDivElement | null>(null);
@@ -19,12 +23,6 @@ export default function MapView() {
   // Add vector layer for rendering
   const vectorLayer2 = new VectorLayer({
     source: source,
-  });
-
-  const draw = new Draw({
-    source: source,
-    type: "LineString",
-    freehand: true,
   });
 
   useEffect(() => {
@@ -44,7 +42,6 @@ export default function MapView() {
         center: [11557167.27, 150529.06],
         zoom: 8,
         maxZoom: 17,
-        minZoom: 5,
       }),
       overlays: [overlayInstance.current],
       controls: [
@@ -52,16 +49,14 @@ export default function MapView() {
         // new ZoomSlider(),
         // new Rotate({ label: "hello" }),
         // new FullScreen({ tipLabel: "Toggle fullscreen" }),
+        new OverviewMap(),
+        new MousePosition({
+          coordinateFormat: createStringXY(1),
+          projection: "EPSG:4326",
+        }),
+        new Attribution(),
+        myControl,
       ],
-    });
-
-    mapInstance.current.addInteraction(draw);
-    draw.on("drawend", (e) => {
-      console.log("🚀 ~ MapView ~ e:", e);
-      const geoJSONFormat = new GeoJSON();
-      console.log("🚀 ~ MapView ~ geoJSONFormat:", geoJSONFormat);
-      const drawFeature = geoJSONFormat.writeFeatures([e.feature]);
-      console.log("🚀 ~ MapView ~ drawFeature:", drawFeature);
     });
 
     // Cleanup on unmount

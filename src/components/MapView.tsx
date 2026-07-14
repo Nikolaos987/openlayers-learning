@@ -4,9 +4,10 @@ import { Map, Overlay, View } from "ol";
 
 import "./MapView.css";
 import { defaults as defaultInteractions, Draw } from "ol/interaction";
-import { tileLayer, vectorLayer } from "./layers";
+import { tileLayer } from "./layers";
 import VectorSource from "ol/source/Vector";
 import VectorLayer from "ol/layer/Vector";
+import GeoJSON from "ol/format/GeoJSON";
 
 export default function MapView() {
   const mapRef = useRef<HTMLDivElement | null>(null);
@@ -22,7 +23,8 @@ export default function MapView() {
 
   const draw = new Draw({
     source: source,
-    type: "Polygon",
+    type: "LineString",
+    freehand: true,
   });
 
   useEffect(() => {
@@ -45,15 +47,22 @@ export default function MapView() {
         minZoom: 5,
       }),
       overlays: [overlayInstance.current],
-      // controls: [
-      //   new ScaleLine(),
-      //   new ZoomSlider(),
-      //   new Rotate({ label: "hello" }),
-      //   new FullScreen({ tipLabel: "Toggle fullscreen" }),
-      // ],
+      controls: [
+        // new ScaleLine(),
+        // new ZoomSlider(),
+        // new Rotate({ label: "hello" }),
+        // new FullScreen({ tipLabel: "Toggle fullscreen" }),
+      ],
     });
 
     mapInstance.current.addInteraction(draw);
+    draw.on("drawend", (e) => {
+      console.log("🚀 ~ MapView ~ e:", e);
+      const geoJSONFormat = new GeoJSON();
+      console.log("🚀 ~ MapView ~ geoJSONFormat:", geoJSONFormat);
+      const drawFeature = geoJSONFormat.writeFeatures([e.feature]);
+      console.log("🚀 ~ MapView ~ drawFeature:", drawFeature);
+    });
 
     // Cleanup on unmount
     return () => {

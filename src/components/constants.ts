@@ -1,5 +1,7 @@
+import { getArea, type Extent } from "ol/extent";
 import { LineString, Point, Polygon } from "ol/geom";
 import { Projection, toLonLat } from "ol/proj";
+import colormap from "colormap";
 
 export const point = new Point([0, 0]);
 export const line = new LineString([
@@ -50,3 +52,22 @@ export const landGeoJSON = {
     },
   ],
 };
+
+export const min = 1e8; // the smallest area
+export const max = 2e13; // the biggest area
+export const steps = 50;
+export const ramp = colormap({
+  colormap: "blackbody",
+  nshades: steps,
+});
+
+export function clamp(value: number, low: number, high: number) {
+  return Math.max(low, Math.min(value, high));
+}
+
+export function getColor(feature) {
+  const area = getArea(feature.getGeometry());
+  const f = Math.pow(clamp((area - min) / (max - min), 0, 1), 1 / 2);
+  const index = Math.round(f * (steps - 1));
+  return ramp[index];
+}

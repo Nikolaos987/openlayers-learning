@@ -2,7 +2,17 @@ import { useEffect, useRef } from "react";
 import "ol/ol.css";
 import { Map, View } from "ol";
 import { defaults as defaultInteractions } from "ol/interaction";
-import { landLayer } from "./layers";
+import {
+  hillshadeLayer,
+  landLayer,
+  landLayer10m,
+  landLayer110m,
+  landLayer50m,
+  watersLayer,
+  watersLayer10m,
+  watersLayer110m,
+  watersLayer50m,
+} from "./layers";
 
 import "./MapView.css";
 
@@ -16,10 +26,20 @@ export default function MapView() {
     mapInstance.current = new Map({
       target: mapRef.current,
       interactions: defaultInteractions(),
-      layers: [landLayer], // just your styled vector layer, no tiles
+      layers: [
+        landLayer110m,
+        landLayer50m,
+        landLayer10m,
+        watersLayer110m,
+        watersLayer50m,
+        watersLayer10m,
+        hillshadeLayer,
+      ], // just your styled vector layer, no tiles
       view: new View({
-        center: [1800000, 4800000], // roughly Mediterranean area in EPSG:3857
-        zoom: 4,
+        center: [0, 0], // roughly Mediterranean area in EPSG:3857
+        zoom: 3,
+        minZoom: 3,
+        maxZoom: 10,
       }),
     });
 
